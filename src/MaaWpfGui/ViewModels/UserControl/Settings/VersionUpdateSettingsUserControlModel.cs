@@ -390,7 +390,7 @@ public class VersionUpdateSettingsUserControlModel : PropertyChangedBase
         var credential = GetCredential(source);
         try
         {
-            await Instances.VersionUpdateDialogViewModel.VersionUpdateAndAskToRestartAsync();
+            await Instances.VersionUpdateDialogViewModel.CheckAndNotifyVersionUpdateAsync();
             if (source == UpdateSource && revision == credential.Revision)
             {
                 await ResourceUpdater.ResourceUpdateAndReloadAsync();
@@ -493,7 +493,7 @@ public class VersionUpdateSettingsUserControlModel : PropertyChangedBase
     }
 
     /// <summary>
-    /// Gets or sets a value indicating whether to auto download update package.
+    /// Gets or sets a value indicating whether to automatically download resource updates.
     /// </summary>
     public bool AutoDownloadUpdatePackage
     {
@@ -502,55 +502,6 @@ public class VersionUpdateSettingsUserControlModel : PropertyChangedBase
             ConfigFactory.Root.Update.AutoDownloadUpdatePackage = value;
         }
     } = ConfigFactory.Root.Update.AutoDownloadUpdatePackage;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to auto install update package.
-    /// </summary>
-    public bool AutoInstallUpdatePackage
-    {
-        get; set {
-            SetAndNotify(ref field, value);
-            ConfigFactory.Root.Update.AutoInstallUpdatePackage = value;
-        }
-    } = ConfigFactory.Root.Update.AutoInstallUpdatePackage;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to show the updater console window.
-    /// </summary>
-    public bool ShowUpdaterConsole
-    {
-        get; set {
-            SetAndNotify(ref field, value);
-            ConfigFactory.Root.Update.ShowUpdaterConsole = value;
-        }
-    } = ConfigFactory.Root.Update.ShowUpdaterConsole;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether to show the updater progress window.
-    /// </summary>
-    public bool ShowUpdaterProgress
-    {
-        get; set {
-            // 关闭进度窗口属于有风险的操作，需要二次确认
-            if (!value)
-            {
-                var result = MessageBoxHelper.Show(
-                    LocalizationHelper.GetString("Settings.Update.ShowUpdaterProgress.Warning"),
-                    LocalizationHelper.GetString("Common.Warning"),
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning,
-                    yes: LocalizationHelper.GetString("Common.Confirm"),
-                    no: LocalizationHelper.GetString("Common.Cancel"));
-                if (result != MessageBoxResult.Yes)
-                {
-                    return;
-                }
-            }
-
-            SetAndNotify(ref field, value);
-            ConfigFactory.Root.Update.ShowUpdaterProgress = value;
-        }
-    } = ConfigFactory.Root.Update.ShowUpdaterProgress;
 
     /// <summary>
     /// Updates manually.
@@ -564,13 +515,7 @@ public class VersionUpdateSettingsUserControlModel : PropertyChangedBase
             return;
         }
 
-        if (SettingsViewModel.VersionUpdateSettings.UpdateSource == UpdateSource.MirrorChyan && string.IsNullOrEmpty(SettingsViewModel.VersionUpdateSettings.MirrorChyanCdk))
-        {
-            ToastNotification.ShowDirect(LocalizationHelper.GetString("Settings.Update.MirrorChyan.SelectedButNoCdk"));
-            return;
-        }
-
-        var ret = await Instances.VersionUpdateDialogViewModel.CheckAndDownloadVersionUpdate();
+        var ret = await Instances.VersionUpdateDialogViewModel.CheckVersionUpdateAsync();
 
         var toastMessage = ret switch {
             VersionUpdateDialogViewModel.CheckUpdateRetT.NoNeedToUpdate => string.Empty,
@@ -587,7 +532,7 @@ public class VersionUpdateSettingsUserControlModel : PropertyChangedBase
             _ => string.Empty,
         };
 
-        if (toastMessage != string.Empty && !CurrentUpdateCredential.HasError)
+        if (toastMessage != string.Empty)
         {
             ToastNotification.ShowDirect(toastMessage);
         }
@@ -595,11 +540,6 @@ public class VersionUpdateSettingsUserControlModel : PropertyChangedBase
         if (ret == VersionUpdateDialogViewModel.CheckUpdateRetT.AlreadyLatest)
         {
             AchievementTrackerHelper.Instance.Unlock(AchievementIds.LatestVersionInspector);
-        }
-
-        if (ret == VersionUpdateDialogViewModel.CheckUpdateRetT.OK)
-        {
-            _ = Instances.VersionUpdateDialogViewModel.AskToRestart();
         }
     }
 

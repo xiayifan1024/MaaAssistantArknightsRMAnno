@@ -1296,12 +1296,8 @@ DEBUG 目录下保存的图片有数量限制，超出后会自动清理旧图�
     <system:String x:Key="Guide.Restart">重看设置指引</system:String>
     <system:String x:Key="Guide.RestartPrompt">设置指引将在主界面显示，是否立即重启应用？</system:String>
     <system:String x:Key="Guide.Settings">设置指引</system:String>
-    <system:String x:Key="Guide.Skip">跳过</system:String>
-    <system:String x:Key="Guide.SkipPrompt" xml:space="preserve">｢{key=TaskQueue.TaskSettings}｣ 等剩余步骤演示了任务队列的常用操作，建议完整走完。确定跳过吗？&#10;之后可在 ｢{key=Settings.Title} - {key=Settings.Ui.Title} - {key=Guide.Title}｣ 中{key=Guide.Restart}。</system:String>
-    <system:String x:Key="Guide.Tip">鼠标移至此处会有提示哦</system:String>
-    <system:String x:Key="Guide.Title">操作与指引</system:String>
-    <system:String x:Key="Guide.User">使用指引</system:String>
-    <system:String x:Key="Guide.ViewLog">您可以前往 ｢{key=Settings.Title} - {key=Settings.IssueReport.Title} - {key=Error.OpenDebugFolder}｣ 查看日志，了解错误发生的具体原因。</system:String>
+    <system:String x:Key="Guide.Skip">跳过设置</system:String>
+    <system:String x:Key="Guide.TaskSettings.Tip">点击任务旁的齿轮可调整设置，点击 ｢{key=TaskQueue.LinkStart}｣ 运行勾选的任务。</system:String>
     <system:String x:Key="Infrast.ContinueTraining">训练完成后继续尝试专精当前技能</system:String>
     <system:String x:Key="Infrast.Custom.File">自定义基建配置文件</system:String>
     <system:String x:Key="Infrast.Custom.FileHasPlanNoPeriod">自定义基建配置仅有部分计划存在时间段，可能会存在预期外的行为。如需设置换班时间段请保证所有计划均设置时间段，否则请全部留空。</system:String>
@@ -1891,13 +1887,13 @@ DEBUG 目录下保存的图片有数量限制，超出后会自动清理旧图�
     <system:String x:Key="Settings.TransitionSpeed.Fast">快速</system:String>
     <system:String x:Key="Settings.TransitionSpeed.None">无动画</system:String>
     <system:String x:Key="Settings.TransitionSpeed.Normal">原速</system:String>
+    <system:String x:Key="Settings.Ui.Interaction.Title">操作设置</system:String>
     <system:String x:Key="Settings.Ui.Title">界面设置</system:String>
     <system:String x:Key="Settings.Update.AlreadyLatest">已是最新版本~</system:String>
     <system:String x:Key="Settings.Update.AutoCheck">定时检查更新</system:String>
     <system:String x:Key="Settings.Update.AutoCheck.Tip">游戏内 00:00 / 18:00（对应服务器当地时间 04:00 / 22:00）</system:String>
-    <system:String x:Key="Settings.Update.AutoDownload">自动下载更新包</system:String>
-    <system:String x:Key="Settings.Update.AutoDownload.Tip" xml:space="preserve">取消勾选后，检测到新版本时（包括手动触发 ｢{key=Settings.Update.CheckNow}｣）将不再自动下载，仅通过系统通知提示并附带下载链接，可自行下载更新包后拖入 MAA 完成更新。
-若系统通知已关闭，则改为软件内通知，但软件内通知不提供可交互的下载按钮。</system:String>
+    <system:String x:Key="Settings.Update.AutoDownload">自动下载资源更新包</system:String>
+    <system:String x:Key="Settings.Update.AutoDownload.Tip" xml:space="preserve">关闭后，检测到资源更新时仅提醒，可点击 ｢{key=Settings.Update.ResourceUpdate}｣ 手动更新。</system:String>
     <system:String x:Key="Settings.Update.AutoInstall">自动安装更新包</system:String>
     <system:String x:Key="Settings.Update.AutoInstall.Tip">检测到新版本后不再弹窗询问，将在任务空闲时自动更新并重启 MAA</system:String>
     <system:String x:Key="Settings.Update.BuildDateTime">构建日期</system:String>
@@ -1932,6 +1928,7 @@ DEBUG 目录下保存的图片有数量限制，超出后会自动清理旧图�
     <system:String x:Key="Settings.Update.MirrorChyan.SelectedButNoCdk">请前往 ｢{key=Settings.Title} - {key=Settings.Update.Title}｣ 配置 Mirror酱 CDK 或切换海外源。</system:String>
     <system:String x:Key="Settings.Update.MirrorChyan.ValidationFailed">CDK 验证失败，请检查网络。</system:String>
     <system:String x:Key="Settings.Update.NoNeedToUpdateDebugVersion">当前为调试版本，无需更新</system:String>
+    <system:String x:Key="Settings.Update.NotifyOnly.Tip" xml:space="preserve">软件更新仅检查上游主仓库并提醒，不下载或安装软件更新包。</system:String>
     <system:String x:Key="Settings.Update.ResourceDateTime">资源日期</system:String>
     <system:String x:Key="Settings.Update.ResourceRepository">资源仓库</system:String>
     <system:String x:Key="Settings.Update.ResourceUpdate">资源更新</system:String>
@@ -1948,27 +1945,12 @@ DEBUG 目录下保存的图片有数量限制，超出后会自动清理旧图�
 2. 若同时关闭了进度窗口和控制台输出，更新过程将完全无界面提示，难以判断是否卡住或失败。
 
 确定要关闭更新进度窗口吗？</system:String>
-    <system:String x:Key="Settings.Update.Source">更新源</system:String>
+    <system:String x:Key="Settings.Update.Source">资源更新源</system:String>
     <system:String x:Key="Settings.Update.Source.Global">海外源</system:String>
     <system:String x:Key="Settings.Update.Source.MirrorChyan">Mirror酱</system:String>
-    <system:String x:Key="Settings.Update.Source.Tip" xml:space="preserve">
-🌏 使用{key=Settings.Update.Source.Global}：
-    • 未启用 GitHub Token 时，{key=Settings.Update.CheckNow}由 MAA Team 提供更新检测，从 GitHub 下载更新包；{key=Settings.Update.ResourceUpdate}由 {key=Settings.Update.Source.MirrorChyan} 提供免费的更新检测，可手动在设置中点击 ｢{key=Settings.Update.ResourceUpdate}｣ 从 GitHub 下载
-    • 填写并验证 GitHub Token 后，软件和资源的更新检查与下载均由 GitHub 提供。
-
-🔑 使用 {key=Settings.Update.Source.MirrorChyan}：
-    • 填写 CDK 后，支持软件与资源的自动更新
-    • 优先通过 {key=Settings.Update.Source.MirrorChyan} 高速 CDN 下载，更稳定快速
-
-📦 手动更新：
-    • {key=Settings.Update.CheckNow}：下载完整包或 OTA 更新包后拖入应用内，程序会自动解压并清理旧文件
-    • {key=Settings.Update.ResourceUpdate}：下载资源包后覆盖 resource 文件夹。资源为增量内容，请勿删除原文件夹，会资源损坏
-
-📄 更新说明：
-    • {key=Settings.Update.CheckNow}：包含界面与功能更新。界面改动、新功能需通过{key=Settings.Update.CheckNow}获得
-    • {key=Settings.Update.ResourceUpdate}：包含自动战斗新关卡、掉落识别图标、公招干员标签等素材数据
-    • 导航热更：自动触发，用于更新主界面提示与活动关卡入口。成功后右上角会显示 ｢{key=VersionUpdate.Api.UpdateSuccess}｣
-</system:String>
+    <system:String x:Key="Settings.Update.Source.Tip" xml:space="preserve">此选项仅控制资源更新。
+GitHub Token 可用于从 GitHub 检查和下载资源；Mirror酱需要有效 CDK。
+软件版本始终从上游主仓库检查，并仅作提醒。</system:String>
     <system:String x:Key="Settings.Update.StartupCheck">启动时检查更新</system:String>
     <system:String x:Key="Settings.Update.Title">更新设置</system:String>
     <system:String x:Key="Settings.Update.UiVersion">界面版本</system:String>
@@ -2576,6 +2558,7 @@ D:\
     <system:String x:Key="VersionUpdate.PendingFullUpdate.Yes">我已手动确认并备份，继续更新</system:String>
     <system:String x:Key="VersionUpdate.RateLimited">更新请求受到速率限制，请稍后重试。</system:String>
     <system:String x:Key="VersionUpdate.ResourceBroken">资源损坏，可尝试自动修复（重新下载完整安装包），或暂不处理、稍后拖入本地完整包更新。\n\n{key=VersionUpdate.FullPackageUpgrade.Tip}</system:String>
+    <system:String x:Key="VersionUpdate.ResourceBroken.ManualRecovery">资源已损坏，请手动重新下载此分支的软件完整包并解压到新目录。软件不会自动下载或安装上游更新包。</system:String>
     <system:String x:Key="VersionUpdate.ResourceVersion">资源版本</system:String>
     <system:String x:Key="VersionUpdate.SecurityWhitelist.Tip">建议将 MAA 所在文件夹加入对应软件白名单后再试。</system:String>
     <system:String x:Key="VersionUpdate.Title">版本信息</system:String>

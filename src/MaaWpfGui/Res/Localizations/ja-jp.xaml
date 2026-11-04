@@ -1298,12 +1298,8 @@ DEBUGディレクトリに保存される画像には数量制限があり、超
     <system:String x:Key="Guide.Restart">設定ガイドを再表示</system:String>
     <system:String x:Key="Guide.RestartPrompt">設定ガイドはメイン画面に表示されます。今すぐアプリケーションを再起動しますか？</system:String>
     <system:String x:Key="Guide.Settings">設定ガイド</system:String>
-    <system:String x:Key="Guide.Skip">スキップ</system:String>
-    <system:String x:Key="Guide.SkipPrompt" xml:space="preserve">｢{key=TaskQueue.TaskSettings}｣ など残りのステップではタスクの基本的な操作を説明します。最後まで進めることをおすすめします。スキップしますか？&#10;後で ｢{key=Settings.Title} - {key=Settings.Ui.Title} - {key=Guide.Title}｣ で{key=Guide.Restart}できます。</system:String>
-    <system:String x:Key="Guide.Tip">マウスを乗せるとヒントあり</system:String>
-    <system:String x:Key="Guide.Title">操作とガイド</system:String>
-    <system:String x:Key="Guide.User">使用ガイド</system:String>
-    <system:String x:Key="Guide.ViewLog">｢{key=Settings.Title} - {key=Settings.IssueReport.Title} - {key=Error.OpenDebugFolder}｣ にアクセスしてログを確認し、エラーの具体的な原因を把握できます。</system:String>
+    <system:String x:Key="Guide.Skip">設定をスキップ</system:String>
+    <system:String x:Key="Guide.TaskSettings.Tip">タスク横の歯車から設定を変更できます。｢{key=TaskQueue.LinkStart}｣ でチェックしたタスクを実行します。</system:String>
     <system:String x:Key="Infrast.ContinueTraining">訓練完了後に現在スキルの継続特化を試みます</system:String>
     <system:String x:Key="Infrast.Custom.File">基地構成ファイルの指定</system:String>
     <system:String x:Key="Infrast.Custom.FileHasPlanNoPeriod">カスタムインフラストラクチャ設定では、一部のプランにのみ時間帯が設定されている場合があり、予期しない動作が発生する可能性があります。シフト交代時間帯を設定する必要がある場合は、すべてのプランに時間帯が設定されていることを確認してください。設定されていない場合は、すべてのプランを空白のままにしてください。</system:String>
@@ -1893,13 +1889,13 @@ MAA は非インストール型のアプリケーションであり、レジス�
     <system:String x:Key="Settings.TransitionSpeed.Fast">高速</system:String>
     <system:String x:Key="Settings.TransitionSpeed.None">なし</system:String>
     <system:String x:Key="Settings.TransitionSpeed.Normal">標準</system:String>
+    <system:String x:Key="Settings.Ui.Interaction.Title">操作設定</system:String>
     <system:String x:Key="Settings.Ui.Title">UI設定</system:String>
     <system:String x:Key="Settings.Update.AlreadyLatest">最新版をインストール済みです~</system:String>
     <system:String x:Key="Settings.Update.AutoCheck">定期的な更新チェック</system:String>
     <system:String x:Key="Settings.Update.AutoCheck.Tip">ゲーム内 00:00 / 18:00（サーバー現地時間 04:00 / 22:00）</system:String>
-    <system:String x:Key="Settings.Update.AutoDownload">自動アップデート</system:String>
-    <system:String x:Key="Settings.Update.AutoDownload.Tip" xml:space="preserve">オフの場合、更新の検出時（手動で ｢{key=Settings.Update.CheckNow}｣ を実行した場合を含む）に自動ダウンロードは行われず、ダウンロードリンク付きのシステム通知のみが表示されます。リンク先から更新パッケージをダウンロードし、MAA にドラッグして手動更新できます。
-システム通知が無効な場合はアプリ内通知に切り替わりますが、アプリ内通知には操作可能なダウンロードボタンは提供されません。</system:String>
+    <system:String x:Key="Settings.Update.AutoDownload">リソース更新パッケージを自動ダウンロード</system:String>
+    <system:String x:Key="Settings.Update.AutoDownload.Tip" xml:space="preserve">無効にすると、リソース更新の検出時は通知のみ表示します。｢{key=Settings.Update.ResourceUpdate}｣ から手動で更新できます。</system:String>
     <system:String x:Key="Settings.Update.AutoInstall">自動インストール更新</system:String>
     <system:String x:Key="Settings.Update.AutoInstall.Tip">新しいバージョンが見つかっても確認ダイアログを表示せず、タスクの空き時間に自動的にアップデートして MAA を再起動します</system:String>
     <system:String x:Key="Settings.Update.BuildDateTime">ビルド日付</system:String>
@@ -1934,6 +1930,7 @@ MAA は非インストール型のアプリケーションであり、レジス�
     <system:String x:Key="Settings.Update.MirrorChyan.SelectedButNoCdk">｢{key=Settings.Title} - {key=Settings.Update.Title}｣ に移動して MirrorChyan CDK を設定するか、グローバル ソースに切り替えてください。</system:String>
     <system:String x:Key="Settings.Update.MirrorChyan.ValidationFailed">CDK の検証に失敗しました。ネットワーク接続を確認してください。</system:String>
     <system:String x:Key="Settings.Update.NoNeedToUpdateDebugVersion">現在はデバッグバージョンであり、更新は必要ありません</system:String>
+    <system:String x:Key="Settings.Update.NotifyOnly.Tip" xml:space="preserve">ソフトウェアの更新は上流のメインリポジトリを確認して通知するだけで、更新パッケージのダウンロードやインストールは行いません。</system:String>
     <system:String x:Key="Settings.Update.ResourceDateTime">リソース日付</system:String>
     <system:String x:Key="Settings.Update.ResourceRepository">リソース倉庫</system:String>
     <system:String x:Key="Settings.Update.ResourceUpdate">リソース更新</system:String>
@@ -1950,27 +1947,12 @@ MAA は非インストール型のアプリケーションであり、レジス�
 2. 進行状況ウィンドウとコンソール出力の両方をオフにすると、更新中に UI のフィードバックが一切なくなり、停止や失敗の判断が困難になります。
 
 更新進行状況ウィンドウをオフにしてもよろしいですか？</system:String>
-    <system:String x:Key="Settings.Update.Source">更新ソース</system:String>
+    <system:String x:Key="Settings.Update.Source">リソース更新元</system:String>
     <system:String x:Key="Settings.Update.Source.Global">グローバルソース</system:String>
     <system:String x:Key="Settings.Update.Source.MirrorChyan">MirrorChyan</system:String>
-    <system:String x:Key="Settings.Update.Source.Tip" xml:space="preserve">
-🌏 {key=Settings.Update.Source.Global}を使用：
-    • 検証済みの GitHub Token がない場合、{key=Settings.Update.CheckNow}は MAA Team が更新を確認し、GitHub から更新パッケージをダウンロードします。{key=Settings.Update.ResourceUpdate}は {key=Settings.Update.Source.MirrorChyan} が無料で更新を確認し、設定の ｢{key=Settings.Update.ResourceUpdate}｣ をクリックすると GitHub から手動でダウンロードできます
-    • GitHub Token を入力して検証に成功すると、ソフトウェアとリソースの更新確認とダウンロードは、どちらも GitHub が提供します。
-
-🔑 {key=Settings.Update.Source.MirrorChyan}を使用：
-    • CDK を入力すると、ソフトウェアとリソースの自動更新が有効になります
-    • 高速 CDN を通じて {key=Settings.Update.Source.MirrorChyan} から優先的にダウンロード、より安定かつ高速
-
-📦 手動更新：
-    • {key=Settings.Update.CheckNow}：完全パッケージまたは OTA 更新パッケージをダウンロードしてアプリにドラッグすると、自動で解凍し古いファイルを整理します
-    • {key=Settings.Update.ResourceUpdate}：リソースパックをダウンロードし、resource フォルダに上書きしてください。増分データのため、元のフォルダを削除しないでください
-
-📄 更新内容：
-    • {key=Settings.Update.CheckNow}：UI や機能のアップデートを含みます。すべての画面変更や新機能は{key=Settings.Update.CheckNow}経由で提供されます
-    • {key=Settings.Update.ResourceUpdate}：自動戦闘用の新ステージ、ドロップ認識用アイコン、公募タグなどの素材データを含みます
-    • ナビホットパッチ：自動でトリガーされ、ホーム画面のヒントやイベントステージ入口を更新します。成功すると右上に ｢{key=VersionUpdate.Api.UpdateSuccess}｣ と表示されます
-</system:String>
+    <system:String x:Key="Settings.Update.Source.Tip" xml:space="preserve">この設定はリソース更新にのみ適用されます。
+GitHub Token を設定すると GitHub からリソースの確認とダウンロードができます。MirrorChyan には有効な CDK が必要です。
+ソフトウェアのバージョンは常に上流のメインリポジトリで確認し、通知のみ行います。</system:String>
     <system:String x:Key="Settings.Update.StartupCheck">起動時の更新チェック</system:String>
     <system:String x:Key="Settings.Update.Title">アップデート設定</system:String>
     <system:String x:Key="Settings.Update.UiVersion">UI バージョン</system:String>
@@ -2577,6 +2559,7 @@ D:\
     <system:String x:Key="VersionUpdate.PendingFullUpdate.Yes">バックアップ済みです。更新を続行します</system:String>
     <system:String x:Key="VersionUpdate.RateLimited">更新リクエストがレート制限されています。しばらくしてから再試行してください。</system:String>
     <system:String x:Key="VersionUpdate.ResourceBroken">リソースファイルが破損しています。自動修復（完全なパッケージの再ダウンロード）を試すか、今はそのまま続けて、後でローカルの完全パッケージをドラッグして更新してください。\n\n{key=VersionUpdate.FullPackageUpgrade.Tip}</system:String>
+    <system:String x:Key="VersionUpdate.ResourceBroken.ManualRecovery">リソースが破損しています。このフォークのソフトウェア完全パッケージを手動で再ダウンロードし、新しいフォルダーに展開してください。上流のソフトウェア更新は自動でダウンロード・インストールされません。</system:String>
     <system:String x:Key="VersionUpdate.ResourceVersion">リソースバーション</system:String>
     <system:String x:Key="VersionUpdate.SecurityWhitelist.Tip">MAA のフォルダーを当該ソフトの許可リストに追加してから、もう一度お試しください。</system:String>
     <system:String x:Key="VersionUpdate.Title">バージョン情報</system:String>

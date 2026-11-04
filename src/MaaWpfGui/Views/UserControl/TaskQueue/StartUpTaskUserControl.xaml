@@ -76,9 +76,7 @@
             DisplayMemberPath="Display"
             ItemsSource="{Binding ClientTypeList, Source={x:Static settings_vms:GameSettingsUserControlModel.Instance}}"
             SelectedValue="{Binding ClientType, Source={x:Static settings_vms:GameSettingsUserControlModel.Instance}}"
-            SelectedValuePath="Value"
-            Visibility="{c:Binding !TaskSettingVisibilities.Guide,
-                                   Source={x:Static helper:Instances.SettingsViewModel}}" />
+            SelectedValuePath="Value" />
 
         <StackPanel s:View.ActionTarget="{Binding DataContext, RelativeSource={RelativeSource Self}}" DataContext="{Binding Source={x:Static settings_vms:ConnectSettingsUserControlModel.Instance}}">
             <StackPanel d:Visibility="Visible" Visibility="{c:Binding 'ConnectConfig != enums:ConnectConfig.PC'}">

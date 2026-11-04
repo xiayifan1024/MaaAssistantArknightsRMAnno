@@ -1281,26 +1281,10 @@ Cache files (such as maps, operator avatars, etc.) need to be regenerated after 
     <system:String x:Key="Guide.Documentation.Path">You can find MAA's official website and complete documentation at "{key=Settings.Title} - {key=Settings.About.Title} - {key=About.Website}".</system:String>
     <system:String x:Key="Guide.Documentation.Title">📖 Website &amp; Documentation</system:String>
     <system:String x:Key="Guide.Done">Done</system:String>
-    <system:String x:Key="Guide.GearContextMenu.Tip">Right-click gear for more options ↓</system:String>
-    <system:String x:Key="Guide.GenerateReport">Please use "{key=Settings.Title} - {key=Settings.IssueReport.Title} - {key=Error.GenerateSupportPayload}" to generate an error report, and click the blue "{key=Error.Issue}" link to submit feedback.</system:String>
-    <system:String x:Key="Guide.GitHubIssue.Description">MAA Team only accepts feedback submitted by users through GitHub platform following the Issue template specifications, and reserves the right to decide on all feedback.</system:String>
-    <system:String x:Key="Guide.GitHubIssue.Title">⚠️ Feedback Guidelines</system:String>
-    <system:String x:Key="Guide.HoverActionButtons">Hover to Copy/Rename/Delete</system:String>
-    <system:String x:Key="Guide.IssueReport.Subtitle">🔧 When You Encounter Problems</system:String>
-    <system:String x:Key="Guide.LinkStart">← Start Tasks</system:String>
-    <system:String x:Key="Guide.Next">Next</system:String>
-    <system:String x:Key="Guide.OpenSource.Description">As an open source project, users can participate in MAA's development on GitHub platform under the AGPL-3.0 license. MAA Team encourages users to contribute valuable code instead of just reporting issues.</system:String>
-    <system:String x:Key="Guide.OpenSource.Title">💡 Participate in Open Source</system:String>
-    <system:String x:Key="Guide.Prev">Prev</system:String>
-    <system:String x:Key="Guide.Restart">Restart Settings Guide</system:String>
-    <system:String x:Key="Guide.RestartPrompt">The settings guide will be displayed on the main interface. Restart the application now?</system:String>
-    <system:String x:Key="Guide.Settings">Settings Guide</system:String>
-    <system:String x:Key="Guide.Skip">Skip</system:String>
-    <system:String x:Key="Guide.SkipPrompt" xml:space="preserve">The remaining steps, such as "{key=TaskQueue.TaskSettings}", demonstrate common task queue operations. Completing the guide is recommended. Skip anyway?&#10;You can revisit it later via "{key=Guide.Restart}" under "{key=Settings.Title} - {key=Settings.Ui.Title} - {key=Guide.Title}".</system:String>
-    <system:String x:Key="Guide.Tip">Prompt appears when hovered</system:String>
-    <system:String x:Key="Guide.Title">Operations and Guide</system:String>
-    <system:String x:Key="Guide.User">User Guide</system:String>
-    <system:String x:Key="Guide.ViewLog">You can go to "{key=Settings.Title} - {key=Settings.IssueReport.Title} - {key=Error.OpenDebugFolder}" to view logs and understand the specific cause of the error.</system:String>
+    <system:String x:Key="Guide.Reopen">Reopen Setup Guide</system:String>
+    <system:String x:Key="Guide.Settings">Setup Guide</system:String>
+    <system:String x:Key="Guide.Skip">Skip setup</system:String>
+    <system:String x:Key="Guide.TaskSettings.Tip">Use the gear next to a task to change its settings, then select {key=TaskQueue.LinkStart} to run the checked tasks.</system:String>
     <system:String x:Key="Infrast.ContinueTraining">After training is complete, try to continue mastering the current Skill</system:String>
     <system:String x:Key="Infrast.Custom.File">Base Configuration</system:String>
     <system:String x:Key="Infrast.Custom.FileHasPlanNoPeriod">Some rotations in the {key=Infrast.Mode.Custom} configuration have time periods set, which may lead to unexpected behavior. To set shift change time periods, ensure all rotations have time periods configured; otherwise, leave them all blank.</system:String>
@@ -1890,13 +1874,13 @@ If you choose ｢{key=Common.ManualRestart}｣ and start MAA manually later, ｢
     <system:String x:Key="Settings.TransitionSpeed.Fast">Fast</system:String>
     <system:String x:Key="Settings.TransitionSpeed.None">None</system:String>
     <system:String x:Key="Settings.TransitionSpeed.Normal">Normal</system:String>
+    <system:String x:Key="Settings.Ui.Interaction.Title">Interaction Settings</system:String>
     <system:String x:Key="Settings.Ui.Title">GUI</system:String>
     <system:String x:Key="Settings.Update.AlreadyLatest">The latest version has already been installed</system:String>
     <system:String x:Key="Settings.Update.AutoCheck">Scheduled Update Check</system:String>
     <system:String x:Key="Settings.Update.AutoCheck.Tip">In-game 00:00 / 18:00 (Server local time 04:00 / 22:00)</system:String>
-    <system:String x:Key="Settings.Update.AutoDownload">Auto Download Update</system:String>
-    <system:String x:Key="Settings.Update.AutoDownload.Tip" xml:space="preserve">When disabled, detected updates (including manually triggered ｢{key=Settings.Update.CheckNow}｣) will no longer download automatically. Instead, a system notification with a download link will be shown, allowing you to download the package and drag it into MAA manually.
-If system notifications are turned off, an in-app notification will be used instead, though it does not provide an interactive download button.</system:String>
+    <system:String x:Key="Settings.Update.AutoDownload">Automatically download resource updates</system:String>
+    <system:String x:Key="Settings.Update.AutoDownload.Tip" xml:space="preserve">When disabled, resource updates only trigger a notification. Click ｢{key=Settings.Update.ResourceUpdate}｣ to update manually.</system:String>
     <system:String x:Key="Settings.Update.AutoInstall">Auto Install Update</system:String>
     <system:String x:Key="Settings.Update.AutoInstall.Tip">No longer shows a confirmation dialog when a new version is detected; MAA will update and restart automatically when tasks are idle</system:String>
     <system:String x:Key="Settings.Update.BuildDateTime">Build Date</system:String>
@@ -1931,6 +1915,7 @@ A read-only token is recommended; no other permissions are required.</system:Str
     <system:String x:Key="Settings.Update.MirrorChyan.SelectedButNoCdk">Please go to ｢{key=Settings.Title} - {key=Settings.Update.Title}｣ to configure MirrorChyan CDK or switch to Global Source.</system:String>
     <system:String x:Key="Settings.Update.MirrorChyan.ValidationFailed">CDK validation failed. Check your network connection.</system:String>
     <system:String x:Key="Settings.Update.NoNeedToUpdateDebugVersion">Now using debug version, no need to update</system:String>
+    <system:String x:Key="Settings.Update.NotifyOnly.Tip" xml:space="preserve">Software updates only check the upstream repository and notify you. Software update packages are never downloaded or installed.</system:String>
     <system:String x:Key="Settings.Update.ResourceDateTime">Resource Date</system:String>
     <system:String x:Key="Settings.Update.ResourceRepository">Resource Repository</system:String>
     <system:String x:Key="Settings.Update.ResourceUpdate">Resource update</system:String>
@@ -1947,27 +1932,12 @@ Please note:
 2. If both the progress window and console output are disabled, the update will run with no UI feedback at all, making it hard to tell if it is stuck or has failed.
 
 Are you sure you want to disable the update progress window?</system:String>
-    <system:String x:Key="Settings.Update.Source">Update Source</system:String>
+    <system:String x:Key="Settings.Update.Source">Resource update source</system:String>
     <system:String x:Key="Settings.Update.Source.Global">Global Source</system:String>
     <system:String x:Key="Settings.Update.Source.MirrorChyan">MirrorChyan</system:String>
-    <system:String x:Key="Settings.Update.Source.Tip" xml:space="preserve">
-🌏 Using {key=Settings.Update.Source.Global}:
-    • Without a validated GitHub Token, {key=Settings.Update.CheckNow} checks are provided by the MAA Team, with update packages downloaded from GitHub; {key=Settings.Update.ResourceUpdate} checks are provided free by {key=Settings.Update.Source.MirrorChyan}, and you can click "{key=Settings.Update.ResourceUpdate}" in Settings to download from GitHub manually
-    • After entering and validating a GitHub Token, both software and resource update checks and downloads are provided by GitHub.
-
-🔑 Using {key=Settings.Update.Source.MirrorChyan}:
-    • After entering a CDK, automatic updates for both software and resources are enabled
-    • Downloads are prioritized via the high-speed {key=Settings.Update.Source.MirrorChyan} CDN for greater stability and speed
-
-📦 Manual Update:
-    • {key=Settings.Update.CheckNow}: Download a full package or OTA update package and drag it into the app. The app will automatically extract it and clean up old files
-    • {key=Settings.Update.ResourceUpdate}: Download the resource package and overwrite the `resource` folder. The package is incremental; do not delete the original folder, or errors may occur
-
-📄 Update Notes:
-    • {key=Settings.Update.CheckNow}: Includes UI and feature updates. All interface changes and new features are delivered via {key=Settings.Update.CheckNow}
-    • {key=Settings.Update.ResourceUpdate}: Includes new stage maps for Auto Battle, drop item icons for recognition, recruitment tags for operator recognition, and other resource data
-    • Navigation Hotfix: Triggered automatically to update main screen prompts and event stage entries. A success message “{key=VersionUpdate.Api.UpdateSuccess}” will appear in the top right corner
-</system:String>
+    <system:String x:Key="Settings.Update.Source.Tip" xml:space="preserve">This option only controls resource updates.
+A GitHub token enables resource checks and downloads from GitHub; MirrorChyan requires a valid CDK.
+Software versions are always checked against the upstream repository, with notifications only.</system:String>
     <system:String x:Key="Settings.Update.StartupCheck">Startup Update Check</system:String>
     <system:String x:Key="Settings.Update.Title">Update</system:String>
     <system:String x:Key="Settings.Update.UiVersion">UI Version</system:String>
@@ -2576,6 +2546,7 @@ Continue only after you have verified the directory layout and finished a manual
     <system:String x:Key="VersionUpdate.PendingFullUpdate.Yes">I backed it up, continue update</system:String>
     <system:String x:Key="VersionUpdate.RateLimited">Update requests are rate limited. Please try again later.</system:String>
     <system:String x:Key="VersionUpdate.ResourceBroken">The resources are damaged. Try auto repair (download the full package again), or continue for now and update later by dragging in a local full package.\n\n{key=VersionUpdate.FullPackageUpgrade.Tip}</system:String>
+    <system:String x:Key="VersionUpdate.ResourceBroken.ManualRecovery">Resources are damaged. Manually download the full software package for this fork and extract it into a new folder. Upstream software updates will not be downloaded or installed automatically.</system:String>
     <system:String x:Key="VersionUpdate.ResourceVersion">Resource Version</system:String>
     <system:String x:Key="VersionUpdate.SecurityWhitelist.Tip">add the MAA installation folder to that software's allowlist before trying again.</system:String>
     <system:String x:Key="VersionUpdate.Title">Version Information</system:String>

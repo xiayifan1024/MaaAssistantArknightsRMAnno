@@ -477,7 +477,7 @@ public class Bootstrapper : Bootstrapper<RootViewModel>
 
         ConsumeDelegatedUpdateResult();
 
-        if (!VerifyInstallLocation() || !TryApplyPendingUpdatePackage())
+        if (!VerifyInstallLocation())
         {
             return;
         }
@@ -719,53 +719,6 @@ public class Bootstrapper : Bootstrapper<RootViewModel>
     }
 
     /// <summary>
-    /// 应用待处理的更新包：委托外部 updater 或进程内应用，成功后早退重启。
-    /// </summary>
-    /// <returns>是否继续启动；false 时已请求退出或已触发重启。</returns>
-    private static bool TryApplyPendingUpdatePackage()
-    {
-        if (!PendingUpdateApplier.HasPendingUpdatePackage())
-        {
-            return true;
-        }
-
-        _logger.Information("Pending update package detected, applying before full startup");
-        var pendingUpdateResult = PendingUpdateApplier.TryApplyPendingUpdatePackage();
-        if (pendingUpdateResult.Delegated)
-        {
-            _logger.Information("Pending update package handed off to external updater, exiting current process");
-            FlushLogAndExit();
-            return false;
-        }
-
-        if (pendingUpdateResult.Succeeded)
-        {
-            RestartAfterPendingUpdateEarly();
-            return false;
-        }
-
-        if (pendingUpdateResult.Status == PendingUpdateApplyResult.StatusKind.MissingUpdaterExecutable)
-        {
-            _logger.Error("Pending update package could not be delegated because MAA.Updater.exe is missing. Reason: {Reason}", pendingUpdateResult.FailureReason);
-            ShowPendingUpdateMissingUpdaterDialog();
-            FlushLogAndExit();
-            return false;
-        }
-
-        if (pendingUpdateResult.RequiresManualRecovery)
-        {
-            // 进程内应用失败且安装已变动：写入失败标志持久化，与委托更新失败共用
-            // 主窗口显示后的修复弹窗路径，此处不退出
-            _logger.Error("Pending update package left the installation in an incomplete state. Reason: {Reason}", pendingUpdateResult.FailureReason);
-            PendingUpdateApplier.MarkDelegatedUpdateFailure(pendingUpdateResult.FailureReason ?? string.Empty);
-            MarkResourceBroken();
-        }
-
-        _logger.Warning("Pending update package could not be applied, continuing with normal startup");
-        return true;
-    }
-
-    /// <summary>
     /// 演示模式（README 截图）的配置整形。
     /// </summary>
     private static void ApplyDemoModeConfigOverrides()
@@ -779,12 +732,10 @@ public class Bootstrapper : Bootstrapper<RootViewModel>
         // 统一归位；客户端类型固定为官服（与演示数据 zh-cn 组一致），使 Core 资源加载与启动时的
         // 关卡/活动解析都基于国服资源，不受运行目录遗留的外服配置影响；
         // 置空自定义背景路径并关闭莫奈取色，截图不携带运行目录遗留的背景图与取色主题；
-        // 设置指引按已完成处理，避免全新配置首次启动时向导覆盖任务页截图。
         // 必须在 ConvertConfig 之后执行，否则未迁移旧配置的转换结果会覆盖这里的设置
         ConfigFactory.CurrentConfig.Gui.RuntimeSettings.ClientType = MaaWpfGui.Constants.Enums.ClientType.Official;
         ConfigFactory.Root.Gui.Background.ImagePath = string.Empty;
         ConfigFactory.Root.Gui.BackgroundMonetEnabled = false;
-        ConfigFactory.Root.Gui.GuideStep = SettingsViewModel.GuideMaxStep;
     }
 
     /// <summary>
@@ -1202,18 +1153,10 @@ public class Bootstrapper : Bootstrapper<RootViewModel>
             return;
         }
 
-        bool wasFirstBoot = Instances.VersionUpdateDialogViewModel.IsFirstBootAfterUpdate;
-
         Instances.WindowManager.ShowWindow(rootViewModel);
         Instances.InstantiateOnRootViewDisplayed(Container);
         StartInstanceActivationListener();
         StartInstanceKeepAwakeListener();
-
-        // 如果 IsFirstBootAfterUpdate 从 false 变为 true，说明这次启动只是解压更新包，不用执行后续逻辑
-        if (!wasFirstBoot && Instances.VersionUpdateDialogViewModel.IsFirstBootAfterUpdate)
-        {
-            return;
-        }
 
         if (IsDemoMode)
         {
@@ -1522,34 +1465,6 @@ public class Bootstrapper : Bootstrapper<RootViewModel>
 #nullable restore
 
     /// <summary>
-    /// 在完整 GUI 尚未初始化前，应用待处理更新后立即重启。
-    /// 若当前进程已带 <see cref="SkipStartupAutoRunArg"/>，则原样转发给下一进程。
-    /// </summary>
-    private static void RestartAfterPendingUpdateEarly()
-    {
-        _logger.Information("Pending update package applied, restarting application");
-        Log.CloseAndFlush();
-        if (Environment.ProcessPath is not null)
-        {
-            var startInfo = new ProcessStartInfo {
-                FileName = Environment.ProcessPath,
-                WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory,
-                UseShellExecute = false,
-            };
-            foreach (string arg in GetForwardableRestartArgs())
-            {
-                startInfo.ArgumentList.Add(arg);
-            }
-
-            Process.Start(startInfo);
-        }
-
-        // 紧邻进程退出再释放互斥量，缩小释放后第三实例抢锁插进来的窗口
-        ReleaseInstanceMutex();
-        Environment.Exit(0);
-    }
-
-    /// <summary>
     /// 获取需要转发给下一进程的启动参数（当前转发 skip-startup-auto-run 与 keep-awake 及剩余时长）。
     /// </summary>
     /// <returns>需要转发的参数数组；无需转发时为空数组。</returns>
@@ -1581,26 +1496,6 @@ public class Bootstrapper : Bootstrapper<RootViewModel>
 
         args.Add(KeepAwakeArg);
         args.Add(remainingMinutes.ToString(System.Globalization.CultureInfo.InvariantCulture));
-    }
-
-    /// <summary>
-    /// 若启动设置允许，返回 ｢更新后立即重启｣ 链应写入的参数；否则返回空。
-    /// 仅用于自动安装或更新提示中选择立即重启； ｢稍后｣ 手动启动不调用此方法。
-    /// </summary>
-    /// <returns>应写入的参数数组；选项关闭时为空数组。</returns>
-    public static string[] GetUpdateRestartArgsIfEnabled()
-    {
-        return ConfigFactory.CurrentConfig.Gui.StartUpSettings.SkipStartupAutoRunAfterUpdate
-            ? [SkipStartupAutoRunArg]
-            : [];
-    }
-
-    private static void ShowPendingUpdateMissingUpdaterDialog()
-    {
-        MessageBoxHelper.Show(
-            LocalizationHelper.GetString("VersionUpdate.MissingUpdater"),
-            LocalizationHelper.GetString("Common.Error"),
-            icon: MessageBoxImage.Error);
     }
 
     /// <summary>

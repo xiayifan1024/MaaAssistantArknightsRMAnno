@@ -1070,7 +1070,7 @@ public class TaskQueueViewModel : Screen
         _ = Task.Run(async () => {
             _logger.Information("waiting for update check: {DelayTime}", delayTime);
             await Task.Delay(delayTime);
-            await Instances.VersionUpdateDialogViewModel.VersionUpdateAndAskToRestartAsync();
+            await Instances.VersionUpdateDialogViewModel.CheckAndNotifyVersionUpdateAsync();
             await ResourceUpdater.ResourceUpdateAndReloadAsync();
 
             _isCheckingForUpdates = false;

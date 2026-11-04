@@ -108,11 +108,6 @@ public class TaskSettingVisibilityInfo : PropertyChangedBase
     /// <param name="enable">启用与否</param>
     public void Set(int taskIndex, bool enable)
     {
-        if (Guide && enable)
-        {
-            enable = false;
-        }
-
         // 边界检查
         if (taskIndex < 0 || taskIndex >= ConfigFactory.CurrentConfig.TaskQueue.Count)
         {
@@ -230,6 +225,4 @@ public class TaskSettingVisibilityInfo : PropertyChangedBase
     }
 
     public bool AdvancedSettingsVisibility { get; set => SetAndNotify(ref field, value); }
-
-    public bool Guide { get; set => SetAndNotify(ref field, value); } = ConfigFactory.Root.Gui.GuideStep < SettingsViewModel.GuideMaxStep;
 }

@@ -693,8 +693,7 @@ public class AsstProxy
             AsstSetStaticOption(AsstStaticOptionKey.GpuOCR, x.DeviceSelector);
         }
 
-        // 上次更新失败的持久标志存在时跳过资源加载（安装可能处于半更新状态），视同资源损坏走修复流程；
-        // 失败标志随完整包安装清场移除，因此修复成功重启后本检查自然不再命中
+        // 兼容旧版更新失败的持久标志：安装可能处于半更新状态，跳过资源加载并提示手动恢复。
         bool delegatedUpdateFailure = PendingUpdateApplier.TryReadDelegatedUpdateFailure(out string? delegatedUpdateFailureReason);
 
         bool loaded = !delegatedUpdateFailure && LoadResource();
@@ -714,7 +713,7 @@ public class AsstProxy
 
             if (delegatedUpdateFailure)
             {
-                // 上次更新失败：先弹说明窗展示失败原因，再由下方资源损坏弹窗提供修复入口
+                // 上次更新失败：先展示失败原因，再提示手动恢复安装。
                 MessageBoxHelper.Show(
                     LocalizationHelper.GetStringFormat(
                         "VersionUpdate.DelegatedFailure.Detected",
@@ -817,29 +816,13 @@ public class AsstProxy
 
     private static void ShowResourceBrokenPrompt()
     {
-        // Show 内部自行切 UI 线程，此处阻塞后台任务直至用户选择
-        var repair = MessageBoxHelper.Show(
-            LocalizationHelper.GetString("VersionUpdate.ResourceBroken"),
+        MessageBoxHelper.Show(
+            LocalizationHelper.GetString("VersionUpdate.ResourceBroken.ManualRecovery"),
             LocalizationHelper.GetString("Common.Error"),
-            MessageBoxButton.YesNo,
+            MessageBoxButton.OK,
             MessageBoxImage.Error,
             iconKey: ResourceToken.FatalGeometry,
-            iconBrushKey: ResourceToken.DangerBrush,
-            yes: LocalizationHelper.GetString("VersionUpdate.IntegrityRepair.Yes"),
-            no: LocalizationHelper.GetString("VersionUpdate.IntegrityRepair.No"));
-        if (repair == MessageBoxResult.Yes)
-        {
-            _logger.Information("User chose auto repair on resource-broken dialog");
-
-            // 修复流程需要 UI 上下文；期间应用保持运行（任务启动已被标志拦截），
-            // 另一入口已在修复时由防重入兜底直接返回
-            Execute.OnUIThread(() => _ = Instances.VersionUpdateDialogViewModel.RunIntegrityRepairAsync());
-        }
-        else
-        {
-            // 暂不处理：保持运行，保留拖入本地完整包等后续更新途径；任务入口已被标志拦截
-            _logger.Information("User declined auto repair on resource-broken dialog, continuing");
-        }
+            iconBrushKey: ResourceToken.DangerBrush);
     }
 
     /// <summary>

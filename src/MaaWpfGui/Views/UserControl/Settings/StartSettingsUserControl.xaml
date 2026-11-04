@@ -74,12 +74,6 @@
                     IsChecked="{Binding OpenPcClientAfterLaunch}" />
                 <controls:TooltipBlock TooltipText="{DynamicResource Settings.Startup.OpenPcClientAfterLaunch.Tip}" />
             </StackPanel>
-            <StackPanel Margin="10" Orientation="Horizontal">
-                <CheckBox MaxWidth="210" IsChecked="{Binding SkipStartupAutoRunAfterUpdate}">
-                    <controls:TextBlock Text="{DynamicResource Settings.Startup.SkipStartupAutoRunAfterUpdate}" TextWrapping="Wrap" />
-                </CheckBox>
-                <controls:TooltipBlock Grid.Column="1" TooltipText="{DynamicResource Settings.Startup.SkipStartupAutoRunAfterUpdate.Tip}" />
-            </StackPanel>
             <StackPanel
                 Margin="10"
                 Orientation="Horizontal"

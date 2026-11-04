@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using MaaWpfGui.Constants;
 using MaaWpfGui.Services.Web;
 using MaaWpfGui.ViewModels.UI;
+using MaaWpfGui.ViewModels.UserControl.Settings;
 using Newtonsoft.Json.Linq;
 using Semver;
 using Serilog;
@@ -40,6 +41,55 @@ public static class GitHubUpdateHelper
     internal const string RateLimitedErrorKey = "VersionUpdate.RateLimited";
 
     private sealed record CachedManifest(string ETag, JObject Body, int CredentialRevision);
+
+    /// <summary>
+    /// 查询上游主仓库的发布信息，仅用于软件版本提醒。
+    /// </summary>
+    /// <param name="channel">软件发布渠道。</param>
+    /// <returns>发布信息与检查结果。</returns>
+    public static async Task<(JObject? Data, CheckUpdateRetT Ret)> GetUpstreamReleaseAsync(VersionUpdateSettingsUserControlModel.UpdateVersionType channel)
+    {
+        var token = SettingsViewModel.VersionUpdateSettings.GitHubCredential.Value;
+        var headers = new Dictionary<string, string> { ["Accept"] = "application/vnd.github+json" };
+        if (!string.IsNullOrWhiteSpace(token) && token.All(c => c > ' ' && c < '\u007f'))
+        {
+            headers = CreateHeaders(token);
+        }
+
+        var endpoint = channel == VersionUpdateSettingsUserControlModel.UpdateVersionType.Stable
+            ? "releases/latest"
+            : "releases?per_page=100";
+        using var response = await Instances.HttpService.GetAsync(
+            new Uri($"{MaaUrls.GitHubApi}/repos/MaaAssistantArknights/MaaAssistantArknights/{endpoint}"),
+            headers, HttpCompletionOption.ResponseContentRead).ConfigureAwait(false);
+        if (response.StatusCode != HttpStatusCode.OK)
+        {
+            return (null, CheckUpdateRetT.NetworkError);
+        }
+
+        var json = JToken.Parse(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+        var releases = json is JArray array ? array.OfType<JObject>() : json is JObject obj ? [obj] : Enumerable.Empty<JObject>();
+        JObject? latest = null;
+        SemVersion? latestVersion = null;
+        foreach (var release in releases)
+        {
+            if (release.Value<bool>("draft") ||
+                !SemVersion.TryParse(release.Value<string>("tag_name"), SemVersionStyles.AllowLowerV, out var version) ||
+                (channel == VersionUpdateSettingsUserControlModel.UpdateVersionType.Stable && version.IsPrerelease) ||
+                (channel == VersionUpdateSettingsUserControlModel.UpdateVersionType.Beta && IsNightlyVersion(version)))
+            {
+                continue;
+            }
+
+            if (latestVersion is null || latestVersion.ComparePrecedenceTo(version) < 0)
+            {
+                latest = release;
+                latestVersion = version;
+            }
+        }
+
+        return (latest, latest is null ? CheckUpdateRetT.FailedToGetInfo : CheckUpdateRetT.OK);
+    }
 
     public static Dictionary<string, string> CreateHeaders(string token) => new() {
         ["Accept"] = "application/vnd.github+json",

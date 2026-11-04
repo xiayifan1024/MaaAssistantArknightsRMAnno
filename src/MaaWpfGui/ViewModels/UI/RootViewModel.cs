@@ -16,7 +16,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,7 +29,6 @@ using MaaWpfGui.Extensions;
 using MaaWpfGui.Helper;
 using MaaWpfGui.Main;
 using MaaWpfGui.Models;
-using MaaWpfGui.Services;
 using MaaWpfGui.ViewModels.UserControl.Settings;
 using Microsoft.WindowsAPICodePack.Taskbar;
 using Serilog;
@@ -96,93 +94,11 @@ public class RootViewModel : Conductor<Screen>.Collection.OneActive
             }
         });
 
-        _ = StartupIntegrityCheckAndUpdateAsync();
+        _ = Instances.VersionUpdateDialogViewModel.ShowUpdateOrDownload();
 
         // 主窗口已显示，此时弹窗不会导致 WPF 因无窗口而退出
         Task.Run(ConfigBrokenCheck);
         Task.Run(ToastNotificationCheck);
-    }
-
-    /// <summary>
-    /// 启动时的完整性检查与更新检查。
-    /// 对照 filelist.txt 检查安装文件是否缺失，缺失时弹窗询问是否修复（重新下载完整包）；
-    /// 未缺失、用户选择忽略、或修复未完成（失败/用户取消）时回退常规更新检查。
-    /// 资源已标记损坏时本检查整体跳过（扫描前后各检测一次标志），修复入口由资源损坏弹窗统一提供，
-    /// 不再叠加缺失弹窗或常规更新弹窗。前检测拦 OnStart 已置位的更新失败标志（时序有同步保证），
-    /// 后检测拦扫描期间 Init 才置位的资源损坏（两者并发赛跑）。
-    /// 必须在主窗口显示之后执行，否则弹窗会成为唯一窗口，关闭时触发 WPF 退出。
-    /// </summary>
-    private static async Task StartupIntegrityCheckAndUpdateAsync()
-    {
-        if (Bootstrapper.IsResourceBroken)
-        {
-            _logger.Information("Skip startup integrity check, resource-broken dialog takes over");
-            return;
-        }
-
-        var missingFiles = await Task.Run(ResourceIntegrityChecker.GetMissingFiles);
-
-        // 后检测：资源在扫描期间才标记损坏（与 Init 并发）时也不再叠任何弹窗，缺失数与是否缺失无关
-        if (Bootstrapper.IsResourceBroken)
-        {
-            _logger.Information("Skip integrity and update check, resource-broken dialog takes over, {Count} file(s) missing", missingFiles.Count);
-            return;
-        }
-
-        if (missingFiles.Count > 0)
-        {
-            var shownFiles = string.Join(", ", missingFiles.Take(5));
-            if (missingFiles.Count > 5)
-            {
-                shownFiles += ", …";
-            }
-
-            var repairChoice = MessageBoxHelper.Show(
-                LocalizationHelper.GetStringFormat("VersionUpdate.IntegrityCheck.Description", missingFiles.Count, shownFiles),
-                LocalizationHelper.GetString("VersionUpdate.IntegrityCheck.Title"),
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Error,
-                yes: LocalizationHelper.GetString("VersionUpdate.IntegrityRepair.Yes"),
-                no: LocalizationHelper.GetString("VersionUpdate.IntegrityRepair.No"));
-            if (repairChoice == MessageBoxResult.Yes)
-            {
-                // 修复优先于常规更新检查，注册完成后会提示重启
-                _logger.Information("Integrity repair accepted by user, {Count} file(s) missing", missingFiles.Count);
-                var repairResult = await Instances.VersionUpdateDialogViewModel.RunIntegrityRepairAsync();
-                if (repairResult is Dialogs.VersionUpdateDialogViewModel.IntegrityRepairResult.Succeeded
-                    or Dialogs.VersionUpdateDialogViewModel.IntegrityRepairResult.AlreadyRunning)
-                {
-                    // AlreadyRunning 表示另一弹窗路径的修复仍在进行，由那条链路收尾，此处不叠加常规更新检查
-                    return;
-                }
-
-                if (repairResult == Dialogs.VersionUpdateDialogViewModel.IntegrityRepairResult.Canceled)
-                {
-                    // 用户主动取消修复：仍执行常规更新检查，持续取消时才不会一直收不到更新提示
-                    _logger.Information("Integrity repair canceled by user, falling back to regular update check");
-                }
-                else
-                {
-                    // 修复失败时回退常规更新检查：完整包升级可补齐缺失文件，
-                    // 但 OTA 增量只含版本间变化的文件，未变化的缺失文件不会被补上
-                    _logger.Warning("Integrity repair failed, falling back to regular update check");
-                }
-            }
-            else
-            {
-                _logger.Warning("Integrity repair declined by user, {Count} file(s) missing", missingFiles.Count);
-            }
-        }
-
-        // 修复仍在进行中（另一弹窗路径已接受修复）时不叠加常规更新检查，避免下载与弹窗互相干扰；
-        // 修复已结束（失败/取消）时标志已复位，回退常规更新检查的行为不变
-        if (Instances.VersionUpdateDialogViewModel.IsIntegrityRepairRunning)
-        {
-            _logger.Information("Skip regular update check, integrity repair in progress");
-            return;
-        }
-
-        await Instances.VersionUpdateDialogViewModel.ShowUpdateOrDownload();
     }
 
     private static void ConfigBrokenCheck()
@@ -420,180 +336,26 @@ public class RootViewModel : Conductor<Screen>.Collection.OneActive
 
     private static async Task HandleImportedPackageAsync(string packagePath)
     {
-        string currentVersion = VersionUpdateSettingsUserControlModel.CoreVersion;
-        string architecture = RuntimeInformation.OSArchitecture.ToString().ToLowerInvariant();
-        string normalizedArchitecture = architecture.StartsWith("arm", StringComparison.OrdinalIgnoreCase)
-            ? "arm64"
-            : "x64";
-
         try
         {
-            // 强制完整包更新期间最常见的版本状态是当前版本即最新，用户从官网重下的同版本完整包是此期间的官方自救途径
-            bool forceFullPackageUpdate = Dialogs.VersionUpdateDialogViewModel.ShouldForceFullPackageUpdate;
-            PendingUpdateApplier.PackageInspectionResult packageInspection =
-                PendingUpdateApplier.InspectLocalUpdatePackage(packagePath, currentVersion, architecture, allowSameVersion: forceFullPackageUpdate);
-
-#if DEBUG
-            // Debug 专用：Ctrl+Shift 拖入时只做检测判断，不实际注册，用于快速验证正则匹配
-            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
+            var (isResourcePackage, resourceDateTime) = await Task.Run(() => {
+                bool result = ResourceUpdater.IsResourcePackage(packagePath, out DateTimeOffset dt);
+                return (result, dt);
+            });
+            if (isResourcePackage)
             {
-                await DebugInspectDroppedPackageAsync(packagePath, packageInspection, currentVersion, normalizedArchitecture);
-                return;
-            }
-#endif
-
-            // 不是版本更新包文件名模式时，尝试作为资源更新包导入（需读取 zip entry，开销较高）
-            if (!packageInspection.MatchedPattern)
-            {
-                // zip 扫描开销较高（万级 entry），放到后台线程避免卡 UI
-                var (isResourcePackage, resourceDateTime) = await Task.Run(() => {
-                    bool result = ResourceUpdater.IsResourcePackage(packagePath, out DateTimeOffset dt);
-                    return (result, dt);
-                });
-
-                if (isResourcePackage)
-                {
-                    _logger.Information("Dropped package detected as resource package: {PackagePath}", packagePath);
-                    _ = ResourceUpdater.ImportLocalResourcePackageAndReloadAsync(packagePath, resourceDateTime);
-                    return;
-                }
-
-                ShowUnsupportedPackageWarning(packagePath, currentVersion, normalizedArchitecture);
+                await ResourceUpdater.ImportLocalResourcePackageAndReloadAsync(packagePath, resourceDateTime);
                 return;
             }
 
-            // 资源损坏/上次更新失败期间 OTA 增量只含差异文件，修不好残留的不一致文件，拖入入口同样只接受完整包
-            if (packageInspection.Status == PendingUpdateApplier.PackageInspectionStatus.OtaSupported
-                && forceFullPackageUpdate)
-            {
-                _logger.Information("Dropped OTA package rejected while installation is broken: {PackagePath}", packagePath);
-                MessageBoxHelper.Show(
-                    LocalizationHelper.GetString("VersionUpdate.OtaRejectedByBrokenInstall"),
-                    LocalizationHelper.GetString("Common.Warning"),
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-                return;
-            }
-
-            // 版本更新包模式匹配，但架构或版本方向被拒
-            if (!packageInspection.IsSupported)
-            {
-                ShowUnsupportedPackageWarning(packagePath, currentVersion, normalizedArchitecture);
-                return;
-            }
-
-            // 完整包覆盖安装需用户二次确认（OTA 增量包不需要）
-            if (packageInspection.Status == PendingUpdateApplier.PackageInspectionStatus.FullSupported
-                && !Dialogs.VersionUpdateDialogViewModel.ConfirmFullPackageUpdate(packagePath))
-            {
-                _logger.Information("Dropped full package import canceled by user before registration: {PackagePath}", packagePath);
-                return;
-            }
-
-            var importResult = PendingUpdateApplier.TryRegisterLocalPackage(
-                packagePath,
-                currentVersion,
-                architecture,
-                packageInspection);
-            _logger.Information(
-                "Dropped zip import result: status={Status}, sourceVersion={SourceVersion}, targetVersion={TargetVersion}",
-                importResult.Status,
-                importResult.SourceVersion,
-                importResult.TargetVersion);
-
-            if (importResult.Status
-                is PendingUpdateApplier.LocalPackageImportStatus.OtaPackageRegistered
-                or PendingUpdateApplier.LocalPackageImportStatus.FullPackageRegistered)
-            {
-                string targetVersion = importResult.TargetVersion ?? string.Empty;
-                bool preserveExistingUpdateInfo = PendingUpdateApplier.ShouldPreserveExistingUpdateBody(targetVersion);
-                Instances.VersionUpdateDialogViewModel.UpdateTag = targetVersion;
-                if (!preserveExistingUpdateInfo)
-                {
-                    Instances.VersionUpdateDialogViewModel.UpdateInfo = string.Empty;
-                }
-
-                Instances.VersionUpdateDialogViewModel.UpdatePackageName = packagePath;
-                _logger.Information(
-                    "Showing restart prompt for imported update package: {PackagePath}, status={Status}",
-                    packagePath,
-                    importResult.Status);
-                _ = Instances.VersionUpdateDialogViewModel.AskToRestartForImportedPackage();
-                return;
-            }
-
-            ShowUnsupportedPackageWarning(packagePath, currentVersion, normalizedArchitecture);
+            ToastNotification.ShowDirect(LocalizationHelper.GetString("Settings.Update.NotifyOnly.Tip"));
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Failed to handle imported package: {PackagePath}", packagePath);
-            ShowUnsupportedPackageWarning(packagePath, currentVersion, normalizedArchitecture);
+            _logger.Error(ex, "Failed to import resource package: {PackagePath}", packagePath);
+            ToastNotification.ShowDirect(LocalizationHelper.GetString("VersionUpdate.GameResource.Failed"));
         }
     }
-
-    private static void ShowUnsupportedPackageWarning(string packagePath, string currentVersion, string normalizedArchitecture)
-    {
-        _logger.Warning("Showing unsupported package warning for dropped package: {PackagePath}", packagePath);
-        MessageBoxHelper.Show(
-            LocalizationHelper.GetStringFormat("VersionUpdate.LocalUpdatePackageUnsupported", Path.GetFileName(packagePath), currentVersion, normalizedArchitecture),
-            LocalizationHelper.GetString("Common.Warning"),
-            MessageBoxButton.OK,
-            MessageBoxImage.Warning,
-            ok: LocalizationHelper.GetString("Common.Ok"));
-    }
-
-#if DEBUG
-    /// <summary>
-    /// Debug 专用：展示拖入包的检测结果（状态、版本、架构），不执行注册或解压。
-    /// 触发方式：按住 Ctrl+Shift 拖入 zip。
-    /// </summary>
-    private static async Task DebugInspectDroppedPackageAsync(
-        string packagePath,
-        PendingUpdateApplier.PackageInspectionResult inspection,
-        string currentVersion,
-        string normalizedArchitecture)
-    {
-        var (isResource, resourceDateTime) = await Task.Run(() => {
-            bool ok = ResourceUpdater.IsResourcePackage(packagePath, out var dt);
-            return (ok, dt);
-        });
-
-        string detail = string.Format(
-            """
-            [DebugInspectDroppedPackage] 仅检测，不注册
-
-            文件: {0}
-            当前版本: {1}
-            当前架构: {2}
-
-            检测状态: {3}
-            MatchedPattern: {4}
-            IsSupported: {5}
-            SourceVersion: {6}
-            TargetVersion: {7}
-
-            是资源包: {8}
-            资源包版本: {9}
-            """,
-            Path.GetFileName(packagePath),
-            currentVersion,
-            normalizedArchitecture,
-            inspection.Status,
-            inspection.MatchedPattern,
-            inspection.IsSupported,
-            inspection.SourceVersion ?? "(null)",
-            inspection.TargetVersion ?? "(null)",
-            isResource,
-            isResource ? resourceDateTime.ToLocalTimeString() : "—");
-
-        _logger.Information("DebugInspectDroppedPackage:\n{Detail}", detail);
-        MessageBoxHelper.Show(
-            detail,
-            "DebugInspectDroppedPackage",
-            MessageBoxButton.OK,
-            MessageBoxImage.Information);
-    }
-#endif
 
     public string GifPath
     {

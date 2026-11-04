@@ -63,7 +63,6 @@ public class AnnouncementDialogViewModel : Screen
             // 计算是否滚动到底部
             var bottom = scrollViewer.VerticalOffset >= scrollViewer.ScrollableHeight - 10;
             IsScrolledToBottom = bottom;
-            HasEverScrolledToBottom |= bottom;
         });
 
         ScrollToTopCommand = new RelayCommand<ScrollViewer>(scrollViewer => {
@@ -123,19 +122,6 @@ public class AnnouncementDialogViewModel : Screen
     {
         get => _isScrolledToBottom;
         set => SetAndNotify(ref _isScrolledToBottom, value);
-    }
-
-    private bool _hasEverScrolledToBottom;
-
-    public bool HasEverScrolledToBottom
-    {
-        get => _hasEverScrolledToBottom;
-        set {
-            if (SetAndNotify(ref _hasEverScrolledToBottom, value) && value)
-            {
-                ButtonContent = LocalizationHelper.GetString("Common.Confirm");
-            }
-        }
     }
 
     private ObservableCollection<AnnouncementSection> _announcementSections;
@@ -270,43 +256,8 @@ public class AnnouncementDialogViewModel : Screen
         ETagCache.Save();
     }
 
-    private int _notFinishedClick = 0;
-    private static readonly string[] _notFinishedMessages = [
-        LocalizationHelper.GetString("Announcement.NotFinishedConfirm"),
-        LocalizationHelper.GetString("Announcement.NotFinishedConfirm2"),
-        LocalizationHelper.GetString("Announcement.NotFinishedConfirm3"),
-    ];
-
-    private string _buttonContent = LocalizationHelper.GetString("Common.Confirm");
-
-    public string ButtonContent
-    {
-        get => _buttonContent;
-        set => SetAndNotify(ref _buttonContent, value);
-    }
-
     public void Close()
     {
-        if (HasEverScrolledToBottom || DoNotRemindThisAnnouncementAgain)
-        {
-            RequestClose();
-        }
-        else
-        {
-            if (_notFinishedClick < _notFinishedMessages.Length)
-            {
-                ButtonContent = _notFinishedMessages[_notFinishedClick++];
-            }
-            else
-            {
-                ButtonContent += "?\u200B";
-                _notFinishedClick++;
-                if (_notFinishedClick > 20)
-                {
-                    AchievementTrackerHelper.Instance.Unlock(AchievementIds.AnnouncementStubbornClick, forceStayOpen: true);
-                    RequestClose();
-                }
-            }
-        }
+        RequestClose();
     }
 }
