@@ -1298,6 +1298,11 @@ DEBUG 目录下保存的图片有数量限制，超出后会自动清理旧图�
     <system:String x:Key="Guide.Settings">设置指引</system:String>
     <system:String x:Key="Guide.Skip">跳过设置</system:String>
     <system:String x:Key="Guide.TaskSettings.Tip">点击任务旁的齿轮可调整设置，点击 ｢{key=TaskQueue.LinkStart}｣ 运行勾选的任务。</system:String>
+    <system:String x:Key="InferenceBackend">推理后端</system:String>
+    <system:String x:Key="InferenceBackendAuto">自动 (推荐)</system:String>
+    <system:String x:Key="InferenceBackendDirectML">DirectML</system:String>
+    <system:String x:Key="InferenceBackendTip" xml:space="preserve">选择模型推理计算后端。&#10;自动模式会选择最成熟稳定的后端（DirectML）；WebGPU 仍处于实验阶段。</system:String>
+    <system:String x:Key="InferenceBackendWebGpu">WebGPU (实验性)</system:String>
     <system:String x:Key="Infrast.ContinueTraining">训练完成后继续尝试专精当前技能</system:String>
     <system:String x:Key="Infrast.Custom.File">自定义基建配置文件</system:String>
     <system:String x:Key="Infrast.Custom.FileHasPlanNoPeriod">自定义基建配置仅有部分计划存在时间段，可能会存在预期外的行为。如需设置换班时间段请保证所有计划均设置时间段，否则请全部留空。</system:String>
