@@ -85,6 +85,8 @@ public class Gui : NotifyPropertyChangedWithValue
     /// </summary>
     public List<SettingKey> SettingOrders { get; set; } = [];
 
+    public bool ShowAdvancedSettings { get; set; }
+
     /// <summary>
     /// 设置页折叠框展开状态。
     /// </summary>
@@ -95,7 +97,16 @@ public class Gui : NotifyPropertyChangedWithValue
     /// </summary>
     public Dictionary<MaaHotKeyAction, MaaHotKey?> HotKeys { get; set; } = [];
 
-    // 保留旧版配置中的完成值。更早的步骤统一显示同一页设置指引。
+    /// <summary>
+    /// 作战日报数据保留档位（全局，data/DailyReport 日文件按此裁剪）。
+    /// </summary>
+    public DailyReportRetention DailyReportRetention { get; set; } = DailyReportRetention.Unlimited;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether 作战日报的图表卡片处于折叠状态。
+    /// </summary>
+    public bool DailyReportChartCollapsed { get; set; } = false;
+
     public Background Background { get; set; } = new();
 
     public Performance Performance { get; set; } = new();
